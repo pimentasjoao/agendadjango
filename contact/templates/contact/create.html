@@ -4,7 +4,7 @@
     <h2>CREATE CONTACT</h2>
 
     <form 
-    action="{% url "contact:create" %}" 
+    action="{{form_action}}"   {# a url de envio do form será dinamica pois duas views diferentes vao usar este template a de create e update #}
     method="POST" enctype="multipart/form-data">
     {% csrf_token %}
  
@@ -16,6 +16,11 @@
             {{field.errors}}
             
         </div>
+        {% if field.name == 'picture' and field.value.url %}
+                <div class="form-group">
+                    <img src="{{ field.value.url }}" alt="Image of {{ field.name }}">
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
     <div class="form-content">

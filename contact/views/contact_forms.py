@@ -5,16 +5,20 @@ from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from contact.models import Contact
 
 
 class ContactForm(forms.ModelForm):    #criando formulario automatico para ser enviado para o template baseado no Model Contact
+    picture = forms.ImageField(
+        widget=forms.FileInput(attrs={'accept': 'image/*',})
+    )
     class Meta:
         model = Contact   #de qual model sera usado
         fields = (   #quais campos serao renderizados
             'first_name', 'last_name', 'phone',
-             'email', 'description', 'category',
+             'email', 'description', 'category','picture',
         )
         widgets = {    #como serao renderizados
             'first_name': forms.TextInput(
@@ -49,32 +53,80 @@ class ContactForm(forms.ModelForm):    #criando formulario automatico para ser e
 
 
 def create(request):
+    form_action=reverse('contact:create')  #metodo reverse serve para desobrir a url de forma reversa dentro de uma view uma que vez que so da para usar {%url %} nos templates
+
     if request.method =='POST':
-        form=ContactForm(request.POST)
+        form=ContactForm(request.POST, request.FILES)
         if form.is_valid():  #verifica se passou nas validaçoes
+            contact=form.save()
+            form_action=reverse('contact:update', kwargs= {"contact_id":contact.pk}) #altera para update
             context = {
             'form': form,
-            'site_title': 'Create - '
+            'site_title': 'Create - ',
+            'form_action':form_action
             }
-            contact=form.save(commit=False)
-            contact.show=False
-            contact.save()
-            return HttpResponse("DEU CERTO")
+            return redirect('contact:update', contact_id=contact.pk)
         else:
-            context = {'form': form,'site_title': 'Create - '} 
+            context = {'form': form,'site_title': 'Create - ', 'form_action': form_action} 
             return render(request,'contact/create.html', context,)
     
     else:   #senao meotodo GET, renderiza a pagina em branco
         context = {
         'form': ContactForm(),
-        'site_title': 'Create - '
+        'site_title': 'Create - ',
+        'form_action':form_action
         }
 
         return render(
         request,
         'contact/create.html', context,)
 
-def update(request):
-    ...
+def update(request, contact_id):
+    contact=get_object_or_404(Contact, pk=contact_id, show=True)
+    form_action=reverse('contact:update',args=(contact_id,))  
+
+    if request.method =='POST':
+        form=ContactForm(request.POST, request.FILES, instance=contact)
+        if form.is_valid():  #verifica se passou nas validaçoes
+            context = {
+            'form': form,
+            'site_title': 'Create - ',
+            'form_action':form_action
+            }
+            contact=form.save()
+            return redirect('contact:update', contact_id=contact.pk)
+        else:
+            context = {'form': form,'site_title': 'Update - ', 'form_action': form_action} 
+            return render(request,'contact/create.html', context,)
+    
+    else:   #senao meotodo GET, renderiza a pagina em branco
+        context = {
+        'form': ContactForm(instance=contact),
+        'site_title': 'Update - ',
+        'form_action':form_action
+        }
+
+        return render(
+        request,
+        'contact/create.html', context,)
+    
+def delete(request, contact_id):
+    contact = get_object_or_404(
+        Contact, pk=contact_id, show=True
+    )
+    confirmation = request.POST.get('confirmation', 'no')
+
+    if confirmation == 'yes':
+        contact.delete()
+        return redirect('contact:index')
+
+    return render(
+        request,
+        'contact/contact.html',
+        {
+            'contact': contact,
+            'confirmation': confirmation,
+        }
+    )
     
 
