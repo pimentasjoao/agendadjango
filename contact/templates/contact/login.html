@@ -2,8 +2,20 @@
 {% block content %}
 <div class="form-wrapper">
     <h2>Login</h2>
+    {% if user.is_authenticated %}
+            <p>
+                Você fez login como {{ user.username }}.
+                Clique <a href="{% url 'contact:logout' %}">aqui</a>
+                para sair.
+            </p>
+            <p>
+                Clique <a href="{% url 'contact:user_update' %}">aqui</a>
+                para alterar dados do seu usuario.
+            </p>
+    {% else %}
+       {% include "contact/partials/_user-form.html" %}
+    {% endif %}
 
-   {% include "contact/partials/_user-form.html" %}
 </div>
 
 {% endblock content %}

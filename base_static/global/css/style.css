@@ -264,7 +264,7 @@
    color: tomato;
  }
  .errorlist.nonfield {
-   color: inherit;
+   color: tomato;
  }
  
  .form-group p {

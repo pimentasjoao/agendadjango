@@ -18,6 +18,8 @@ urlpatterns = [
     #URLS USERS
 
     path('user/create/', views.register, name='register'),
-    path('login/', views.login_view, name='login'),
+    path('user/login/', views.login_view, name='login'),
+    path('user/logout/', views.logout_view, name='logout'),
+    path('user/update/', views.user_update, name='user_update'),
     
 ]

@@ -14,7 +14,7 @@
             <label for="{{field.id_for_label}}">{{field.label}}</label>
             {{field}}
             {{field.errors}}
-            
+            {{ form.non_field_errors }}
         </div>
         {% if field.name == 'picture' and field.value.url %}
                 <div class="form-group">
