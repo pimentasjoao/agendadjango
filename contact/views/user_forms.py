@@ -4,7 +4,7 @@ from .contact_forms import RegisterForm, RegisterUpdateForm
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import auth
-
+from django.contrib.auth.decorators import login_required
 
 def register(request):
   form = RegisterForm()
@@ -50,7 +50,7 @@ def logout_view(request):
     auth.logout(request)
     return redirect('contact:login')
 
-
+@login_required(login_url='contact:login')    #decorator para somente acessar essa view se ele estiver logado, caso nao esteja ele redireciona para rota que eu desejar
 def user_update(request):
     form = RegisterUpdateForm(instance=request.user)
 

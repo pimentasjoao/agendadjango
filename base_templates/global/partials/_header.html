@@ -2,15 +2,18 @@
     <h1 class="header-heading"><a href="{% url "contact:index" %}" class="header-link">Agenda</a></h1>
     <nav class="menu">
         <ul class="menu-list">
+            {% if  user.is_authenticated %}
             <li class="menu-item">
                 <a href="{% url "contact:create" %}" class="menu-link">CADASTRAR CONTACT</a>
             </li>
             <li class="menu-item">
+                <a href="{% url "contact:register" %}" class="menu-link">CAD.USUARIOS</a>
+            </li>
+            {% endif %}
+            <li class="menu-item">
                 <a href="{% url "contact:index" %}" class="menu-link">CONTATOS</a>
             </li>
-            <li class="menu-item">
-                <a href="{% url "contact:register" %}" class="menu-link">USUARIOS</a>
-            </li>
+            
             <li class="menu-item">
                 <a href="{% url "contact:login" %}" class="menu-link">LOGIN</a>
             </li>

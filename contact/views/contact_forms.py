@@ -10,11 +10,13 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from contact.models import Contact
 from django.contrib.auth import password_validation
+from django.contrib.auth.decorators import login_required
 
 
 class ContactForm(forms.ModelForm):    #criando formulario automatico para ser enviado para o template baseado no Model Contact
     picture = forms.ImageField(
-        widget=forms.FileInput(attrs={'accept': 'image/*',})
+        widget=forms.FileInput(attrs={'accept': 'image/*',}),
+        required=False
     )
     class Meta:
         model = Contact   #de qual model sera usado
@@ -53,14 +55,16 @@ class ContactForm(forms.ModelForm):    #criando formulario automatico para ser e
         
         return cleaned_data
 
-
+@login_required(login_url='contact:login')
 def create(request):
     form_action=reverse('contact:create')  #metodo reverse serve para desobrir a url de forma reversa dentro de uma view uma que vez que so da para usar {%url %} nos templates
 
     if request.method =='POST':
         form=ContactForm(request.POST, request.FILES)
         if form.is_valid():  #verifica se passou nas validaçoes
-            contact=form.save()
+            contact=form.save(commit=False)
+            contact.owner=request.user
+            contact.save()
             form_action=reverse('contact:update', kwargs= {"contact_id":contact.pk}) #altera para update
             context = {
             'form': form,
@@ -82,9 +86,9 @@ def create(request):
         return render(
         request,
         'contact/create.html', context,)
-
+@login_required(login_url='contact:login')
 def update(request, contact_id):
-    contact=get_object_or_404(Contact, pk=contact_id, show=True)
+    contact=get_object_or_404(Contact, pk=contact_id, show=True, owner=request.user)
     form_action=reverse('contact:update',args=(contact_id,))  
 
     if request.method =='POST':
@@ -111,11 +115,11 @@ def update(request, contact_id):
         return render(
         request,
         'contact/create.html', context,)
-    
+@login_required(login_url='contact:login')    
 def delete(request, contact_id):
 
     contact = get_object_or_404(
-        Contact, pk=contact_id, show=True
+        Contact, pk=contact_id, show=True, owner=request.user
     )
     confirmation = request.POST.get('confirmation', 'no')
 
